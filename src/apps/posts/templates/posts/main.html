@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+posts
+{% endblock title %}
+
+{% block content %}
+
+<div class="ui grid">
+    <div class="row">
+        <div class="eleven wide column">
+            {% for query in query_set  %}
+
+                <div class="content">
+                    {{query.content}}
+                </div>
+                
+                <div class="content">
+                    <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name='post_id' value={{query.id}}>
+                        <button type="submit" class='ui primary button'>
+
+                            {% if  profile not in query.liked.all %}
+                                <i class="thumbs up icon"></i>&nbsp;Like
+                            {% else %}
+                                <i class="thumbs down icon"></i>&nbsp;Unlike
+                            {% endif %}
+
+                        </button>
+                        &nbsp;{{query.num_likes}}
+                    </form>
+                </div>
+
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock content %}

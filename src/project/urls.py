@@ -23,7 +23,8 @@ from .views import home_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home-view'),
-    path('profiles/', include('apps.profiles.templates.profiles.urls', namespace='profiles'))
+    path('profiles/', include('apps.profiles.templates.profiles.urls', namespace='profiles')),
+    path('posts/', include('apps.posts.templates.posts.urls', namespace='posts'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
