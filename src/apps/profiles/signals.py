@@ -12,7 +12,6 @@ def post_save_create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-
 # creating friend friend requests and expanding friendslist when they are 'accepted'
 @receiver(post_save, sender=Relationship)
 def post_save_add_to_friends(sender, instance, created, **kwargs):
