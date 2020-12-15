@@ -24,6 +24,28 @@ class Profile(models.Model):
     def get_friends_count(self):
         return self.friends.all().count()
 
+    def get_posts_count(self):
+        return self.posts.all().count() # we have access to posts via the fk attr on the Post class in posts/models.py
+
+    def get_all_authored_posts(self):
+        return self.posts.all
+
+    def get_given_likes_count(self):
+        likes = self.like_set.all() # we are using a fk in the Like class @ posts/models.py but we aren't passing it a related_name arg. Thats why we have to use the funky syntax here
+        total_likes = 0
+        for like in likes:
+            if like.value =='Like':
+                total_likes += 1
+        return total_likes
+
+    def get_recieved_likes_count(self):
+        posts = self.posts.all()
+        total_likes = 0
+        for post in posts:
+            total_likes += post.liked.all().count()
+        return total_likes
+
+        
     def __str__(self):
         return f"{self.user.username}-{self.created.strftime('%d-%m-%Y')}"
 

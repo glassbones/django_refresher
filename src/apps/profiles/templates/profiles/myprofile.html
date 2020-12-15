@@ -65,11 +65,7 @@ my profile
                             <td>{{profile.bio}}</td>
                         </tr>
                         <tr>
-                            <td><b>Total Friends:</b></td>
-                            <td>{{profile.get_friends_count}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Friends:</b></td>
+                            <td><b>Friends ({{profile.get_friends_count}}):</b></td>
                             <td>
                                 <ul>
                                     {% for friend in profile.get_friends %}
@@ -77,6 +73,18 @@ my profile
                                     {% endfor %}
                                 </ul>
                             </td>
+                        </tr>
+                        <tr>
+                            <td>Post Count:</td>
+                            <td>{{profile.get_posts_count}}</td>
+                        </tr>
+                        <tr>
+                            <td>Posts Liked:</td>
+                            <td>{{profile.get_given_likes_count}}</td>
+                        </tr>
+                        <tr>
+                            <td>Likes Received:</td>
+                            <td>{{profile.get_recieved_likes_count}}</td>
                         </tr>
                     </tbody>
                 </table>
