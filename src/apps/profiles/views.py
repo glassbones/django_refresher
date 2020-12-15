@@ -1,12 +1,22 @@
 from django.shortcuts import render
 from apps.profiles.models import Profile
-
+from .forms import ProfileModelForm
 # Create your views here.
 def my_profile_view(request):
-    for var in vars(Profile):
-        print(var)
-    obj = Profile.objects.get(user=request.user)
-    #context = {}
+    profile = Profile.objects.get(user=request.user)
+    form = ProfileModelForm(request.POST or None, request.FILES or None, instance=profile) # <-- args here fill the form
+    userHasUpdated = False
 
-    return render(request, 'profiles/myprofile.html', {'obj': obj})
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            userHasUpdated = True
+
+    context = {
+        'profile': profile,
+        'form': form,
+        'userHasUpdated': userHasUpdated
+    }
+
+    return render(request, 'profiles/myprofile.html', context)
 
