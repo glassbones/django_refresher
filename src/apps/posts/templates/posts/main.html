@@ -7,34 +7,69 @@ posts
 {% block content %}
 
 <div class="ui grid">
+
+
     <div class="row">
+
+        <!-- LEFT SIDE -->
+
         <div class="eleven wide column">
             {% for query in query_set  %}
+                    
 
-                <div class="content">
-                    {{query.content}}
+                <div class='ui fluid card'>
+                    <div class="content">
+                        {{query.content}}
+                    </div>
+
+                    <div class="content">
+                        <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name='post_id' value={{query.id}}>
+                            <button type="submit" class='ui primary button'>
+
+                                {% if  profile not in query.liked.all %}
+                                    <i class="thumbs up icon"></i>&nbsp;Like
+                                {% else %}
+                                    <i class="thumbs down icon"></i>&nbsp;Unlike
+                                {% endif %}
+
+                            </button>
+                            &nbsp;{{query.num_likes}}
+                        </form>
+                    </div>
                 </div>
-                
-                <div class="content">
-                    <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name='post_id' value={{query.id}}>
-                        <button type="submit" class='ui primary button'>
-
-                            {% if  profile not in query.liked.all %}
-                                <i class="thumbs up icon"></i>&nbsp;Like
-                            {% else %}
-                                <i class="thumbs down icon"></i>&nbsp;Unlike
-                            {% endif %}
-
-                        </button>
-                        &nbsp;{{query.num_likes}}
-                    </form>
-                </div>
-
+            <div>
+                {% if query.comment_set.all %}
+                    {% for comment in query.comment_set.all %}
+                        <p>{{comment.body}}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <form action='' method='POST' class='ui form'>
+                {% csrf_token %}
+                <input type='hidden' name='post_id' value={{query.id}}>
+                {{c_form}}
+                <button type="submit" class='ui primary button' name="submit_c_form" >Comment</button>
+            </form>
             {% endfor %}
         </div>
+
+        <!-- RIGHT SIDE -->
+
+        <div class="five wide column">
+            {% if post_added %}
+                <div class='ui green message'> Post Succesful! </div>
+            {% endif %}
+            <form action="" method="POST" class="ui form" enctype"multipart/form-data"> <!-- enctype cuz we are dealing with images -->
+                {% csrf_token %}
+                {{p_form}}
+                <button type='submit' class='ui button positive' name="submit_p_form">Create Post</button>
+            </form>
+        </div>
     </div>
+
+
 </div>
 
 

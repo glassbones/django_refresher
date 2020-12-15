@@ -1,27 +1,52 @@
 from django.shortcuts import render, redirect
 from apps.posts.models import Post, Like
 from apps.profiles.models import Profile
+from apps.posts.forms import PostModelForm, CommentModelForm
 
 # Create your views here.
 def post_comment_create_and_list_view(request):
     query_set = Post.objects.all()
     profile = Profile.objects.get(user=request.user)
 
+    # Post form, comment form
+    p_form = PostModelForm()
+    c_form = CommentModelForm()
+    post_added = False
+    
+    profile = Profile.objects.get(user=request.user)
+
+    if 'submit_p_form' in request.POST:
+        p_form = PostModelForm(request.POST, request.FILES)
+        if p_form.is_valid():
+            instance = p_form.save(commit=False) # not commiting(saving) here because we need to splice in the profile as the author
+            instance.author = profile
+            instance.save()
+            p_form = PostModelForm()
+            post_added = True
+
+    if 'submit_c_form' in request.POST:
+        c_form = CommentModelForm(request.POST)
+        if c_form.is_valid():
+            instance = c_form.save(commit=False)
+            instance.user = profile
+            instance.post = Post.objects.get(id=request.POST.get('post_id'))
+            instance.save()
+            c_form = CommentModelForm()
+
     context = {
         'query_set' : query_set,
-        'profile': profile
+        'profile': profile,
+        'p_form': p_form,
+        'c_form': c_form,
+        'post_added' : post_added
     }
 
     return render(request, 'posts/main.html', context)
 
 def like_toggle_post(request):
     user = request.user
-    print(request.method)
-    if request.method == 'POST':
-        print('-----')
-        print(request.POST.get('post_id'))
 
-        print('-----')
+    if request.method == 'POST':
         post_id = request.POST.get('post_id')
         post_obj = Post.objects.get(id=post_id)
         profile = Profile.objects.get(user=user)
