@@ -1,77 +1,113 @@
 {% extends 'base.html' %}
 
-{% block title %}
-posts
-{% endblock title %}
+{% block title %}main page{% endblock title %}
 
 {% block content %}
-
 <div class="ui grid">
+    <div class="eleven wide column">
+        {% for query in query_set %}
 
-
-    <div class="row">
-
-        <!-- LEFT SIDE -->
-
-        <div class="eleven wide column">
-            {% for query in query_set  %}
-                    
-
-                <div class='ui fluid card'>
-                    <div class="content">
-                        {{query.content}}
-                    </div>
-
-                    <div class="content">
-                        <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" name='post_id' value={{query.id}}>
-                            <button type="submit" class='ui primary button'>
-
-                                {% if  profile not in query.liked.all %}
-                                    <i class="thumbs up icon"></i>&nbsp;Like
-                                {% else %}
-                                    <i class="thumbs down icon"></i>&nbsp;Unlike
-                                {% endif %}
-
-                            </button>
-                            &nbsp;{{query.num_likes}}
-                        </form>
+        <div class="ui fluid card">
+            <div class="content">
+                <div class="right floated meta">
+                <div class="ui grid">
+                    <div class="row">
+                        {% ifequal request.user query.author.user %}
+                            <a href="{% url 'posts:post-update' query.pk %}"><button class="ui button bwhite-lg ">Edit</button></a>
+                            <a href="{% url 'posts:post-delete' query.pk %}"><button class="ui button bwhite-lg ">Delete</button></a>
+                        {% endifequal %}
                     </div>
                 </div>
-            <div>
-                {% if query.comment_set.all %}
-                    {% for comment in query.comment_set.all %}
-                        <p>{{comment.body}}</p>
-                    {% endfor %}
+                    
+                </div>
+                <img class="ui avatar image" src={{query.author.avatar.url}}> 
+                {{ query.author.user }} - {{ query.created|timesince}} ago
+            </div>
+            <div class="ui fluid image">
+                {% if query.image %}
+                    <img src={{query.image.url}}>
                 {% endif %}
             </div>
-            <form action='' method='POST' class='ui form'>
-                {% csrf_token %}
-                <input type='hidden' name='post_id' value={{query.id}}>
-                {{c_form}}
-                <button type="submit" class='ui primary button' name="submit_c_form" >Comment</button>
-            </form>
-            {% endfor %}
+            <div class="content">
+                <p> {{ query.content }} </p>
+                <div class="right floated">
+                    <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="post_id" value={{query.id}}>
+                        {% if profile not in query.liked.all %}
+                            <button type="submit" class="ui bwhite-sm button"><i class="thumbs up icon"></i>
+                            </button>
+                            <span> {{query.num_likes}} likes</span>
+                        {% else %}
+                            <button type="submit" class="ui bwhite-sm button"><i class="thumbs down icon"></i>
+                            </button>
+                            <span> {{query.num_likes}} likes</span>
+                        {% endif %}
+                    </form>
+                </div>
+                <i class="comment icon"></i>
+                <span> {{ query.num_comments }} comments</span>
+            </div>
+            <div class="extra content">
+                <div class="mb-5">
+                  
+                </div>
+                <button class="cmt_btn ui button mb-5">Comments</button>
+                <div class="comment-box">
+                {% if query.comment_set.all %}
+                    {% for c in query.comment_set.all %}
+                    
+                        <div class="ui segment mb-5">
+                            <img class="ui avatar image" src={{c.user.avatar.url}}>
+                            <span>{{ c.user }}</span>
+                            <div class='mt-5'>{{ c.body }}</div>
+                        </div>
+                    
+                    {% endfor %}
+                {% endif %}
+                </div>
+  
+                <form action="" method="POST"class='ui fluid form'>
+                    {% csrf_token %}
+                    <input type="hidden" name="post_id" value={{query.id}}>
+                    {{ c_form }}
+                    <button type="submit" name="submit_c_form" class="ui primary button mt-5 w-full">Send</button>
+                </form>
+            </div>
         </div>
 
-        <!-- RIGHT SIDE -->
 
-        <div class="five wide column">
+        {% endfor %}
+    </div>
+    <div class="five wide column">
+        <div class="ui segment">
             {% if post_added %}
-                <div class='ui green message'> Post Succesful! </div>
+                <div class="ui green message">Post added</div>
             {% endif %}
-            <form action="" method="POST" class="ui form" enctype"multipart/form-data"> <!-- enctype cuz we are dealing with images -->
+            <p>Create a new post</p>
+            <form action="" method="POST" class='ui form' enctype="multipart/form-data">
                 {% csrf_token %}
                 {{p_form}}
-                <button type='submit' class='ui button positive' name="submit_p_form">Create Post</button>
+                <button type='submit' name="submit_p_form" class="ui positive button w-full mt-5">Send</button>
             </form>
         </div>
     </div>
-
-
 </div>
-
-
-
 {% endblock content %}
+
+{% block scripts %} 
+    <script>
+        $( document ).ready(function() {
+            let display = false
+            $(".cmt_btn").click(function () {
+                if (display===false) {
+                    $(this).next(".comment-box").show("slow");
+                    display=true
+                } else {
+                    $(this).next(".comment-box").hide("slow");
+                    display=false
+                }  
+            });
+        });
+    </script>
+{% endblock scripts %}
