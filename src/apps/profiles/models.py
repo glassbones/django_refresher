@@ -2,7 +2,30 @@ from django.db import models
 from django.contrib.auth.models import User
 from .._utils import get_random_eight_digit_id
 from django.template.defaultfilters import slugify
+from django.db.models import Q
 
+
+class ProfileManager(models.Manager):
+
+    def get_available_relationships(self, sender):
+        profiles = Profile.objects.all().exclude(user=sender) # all profiles excluding senders profile
+        my_profile = Profile.objects.all().get(user=sender) # senders profile
+        query_set = Relationship.objects.filter(Q(sender=my_profile) | Q(receiver=my_profile)) # all relationships sent and recieved by the sender
+
+        accepted = []
+        for relationship in query_set:
+            if relationship.status == 'accepted':
+                accepted.append(relationship.receiver)
+                accepted.append(relationship.sender)
+        
+        # comparing all profiles lists against accepted list and filtering out all users who the sender already shares a relationship with
+        available_relationships = [profile for profile in profiles if profile not in accepted]
+        return available_relationships
+    
+    def get_all_profiles(self, me):
+        profiles = Profile.objects.all().exclude(user=me)
+        return profiles
+    
 # Create your models here.
 class Profile(models.Model):
 
@@ -17,6 +40,8 @@ class Profile(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     updated = models.DateTimeField(auto_now=True)
     created= models.DateTimeField(auto_now_add=True)
+
+    objects = ProfileManager()
 
     def get_friends(self):
         return self.friends.all()
@@ -64,12 +89,18 @@ class Profile(models.Model):
             to_slug = str(self.user)
         self.slug = to_slug
         super().save(*args, **kwargs)
+
+class RelationshipManager(models.Manager):
+    def invitations_received(self, receiver):
+        queryset = Relationship.objects.filter(receiver=receiver, status='send')
+        return queryset
     
 class Relationship(models.Model):
     sender = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='sender')
     receiver = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='receiver')
     created= models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    objects = RelationshipManager()
     status = models.CharField(max_length=8, choices=(
         ('send', 'send'), 
         ('accepted', 'accepted')
