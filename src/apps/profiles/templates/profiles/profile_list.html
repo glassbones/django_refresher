@@ -21,7 +21,7 @@ all profiles
 
                         <h3>{{obj.user}}</h3>
                         <p>{{obj.bio}}</p>
-                        <button class="ui primary button mb-5 w-big">Profile</button>
+                        <a href={{obj.get_absolute_url}}><button class="ui primary button mb-5 w-big">Profile</button></a>
                         <br>
                         <!-- unbelievably scuffed way of checking if other users share relationships with the user -->
                         <!-- This logic really shouldnt be inside of the HTML lol -->

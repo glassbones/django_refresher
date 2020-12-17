@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from .._utils import get_random_eight_digit_id
 from django.template.defaultfilters import slugify
 from django.db.models import Q
+from django.shortcuts import reverse
 
 
 class ProfileManager(models.Manager):
@@ -42,6 +43,12 @@ class Profile(models.Model):
     created= models.DateTimeField(auto_now_add=True)
 
     objects = ProfileManager()
+    # override
+    def __str__(self):
+        return f"{self.user.username}-{self.created.strftime('%d-%m-%Y')}"
+    # override
+    def get_absolute_url(self):
+        return reverse("profiles:profile-detail-view", kwargs={"slug": self.slug})
 
     def get_friends(self):
         return self.friends.all()
@@ -70,23 +77,29 @@ class Profile(models.Model):
             total_likes += post.liked.all().count()
         return total_likes
 
-        
-    def __str__(self):
-        return f"{self.user.username}-{self.created.strftime('%d-%m-%Y')}"
-
+    __initial_first_name = None
+    __initial_last_name = None
+    # override
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__initial_first_name = self.first_name
+        self.__initial_last_name = self.last_name
+    # override
     def save(self, *args, **kwargs):
         slugExists = False
-        if self.first_name and self.last_name:
-            # if first and last name make the slug "firstname lastname"
-            to_slug = slugify( str(self.first_name) + ' ' + str(self.last_name) )
-            # check if that slug isn't unique
-            slugExists = Profile.objects.filter(slug=to_slug).exists()
-            while slugExists:
-                # while the slug is not unique, append an eight digit id to it and then check if the modified slug is unique
-                to_slug = slugify(to_slug + " " + str(get_random_eight_digit_id()))
+        to_slug = self.slug
+        if self.first_name != self.__initial_first_name or self.last_name != self.__initial_last_name or self.slug=="":
+            if self.first_name and self.last_name:
+                # if first and last name make the slug "firstname lastname"
+                to_slug = slugify( str(self.first_name) + ' ' + str(self.last_name) )
+                # check if that slug isn't unique
                 slugExists = Profile.objects.filter(slug=to_slug).exists()
-        else:
-            to_slug = str(self.user)
+                while slugExists:
+                    # while the slug is not unique, append an eight digit id to it and then check if the modified slug is unique
+                    to_slug = slugify(to_slug + " " + str(get_random_eight_digit_id()))
+                    slugExists = Profile.objects.filter(slug=to_slug).exists()
+            else:
+                to_slug = str(self.user)
         self.slug = to_slug
         super().save(*args, **kwargs)
 
