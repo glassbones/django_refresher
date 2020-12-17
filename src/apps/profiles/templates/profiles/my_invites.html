@@ -5,15 +5,47 @@ my invites
 {% endblock title %}
 
 {% block content %}
-
+    
     {% if is_empty %}
-        <h1>No invatations here..</h1>
+        <h1>You have no new friend requests</h1>
     {% endif %}
  
     {% for query in query_set %}
-        <ul>
-            <li>{{query}}</li>
-        </ul>
+        <div class="ui segment">
+            <div class="ui grid">
+                <div class="row">
+                    <div class="three wide column">
+                        <img class="ui small circular image" src={{query.avatar.url}}>
+                    </div>
+                    <div class="thirteen wide column">
+                        <h3>{{query.user}} sent you a friend request!</h3>
+                        <p>{{query.bio}}</p>
+                        <br>
+                        <a href=""><button class="ui primary button w-big mb-5">Profile</button></a>
+
+                        <form action="{% url 'profiles:accept-invitation' %}" method='POST'>
+                            {% csrf_token %}
+                            <input type='hidden' name='profile_pk' value={{query.pk}}>
+                            <input type='hidden' name='profile_pk' value={{query.pk}}>
+                            <button type='submit' class='ui positive basic button w-big mb-5'>
+                                <i class='close icon'></i>
+                                Accept Request
+                            </button>    
+                        </form>
+
+                        <form action="{% url 'profiles:reject-invitation' %}" method='POST'>
+                            {% csrf_token %}
+                            <input type='hidden' name='profile_pk' value={{query.pk}}>
+                            <button type='submit' class='ui negative basic button w-big mb-5'>
+                                <i class='close icon'></i>
+                                Reject Request
+                            </button>              
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endfor %}
 
 {% endblock content %}
