@@ -31,18 +31,26 @@
             <div class="content">
                 <p> {{ query.content }} </p>
                 <div class="right floated">
-                    <form action="{% url 'posts:like-toggle-post-view' %}" method="POST">
+                    <form action="{% url 'posts:like-toggle-post-view' %}" method="POST" class='like-form' id='{{query.id}}'>
                         {% csrf_token %}
                         <input type="hidden" name="post_id" value={{query.id}}>
-                        {% if profile not in query.liked.all %}
-                            <button type="submit" class="ui bwhite-sm button"><i class="thumbs up icon"></i>
+
+                            <button type="submit" class="ui button like-btn{{query.id}}">
+                                {% if profile not in query.liked.all %}
+                                    Like
+                                {% else %}
+                                    Unlike
+                                {% endif %}
                             </button>
-                            <span> {{query.num_likes}} likes</span>
-                        {% else %}
-                            <button type="submit" class="ui bwhite-sm button"><i class="thumbs down icon"></i>
-                            </button>
-                            <span> {{query.num_likes}} likes</span>
-                        {% endif %}
+                            <div class="ui grid">
+                                <div class="column"> 
+                                    <div class="like-count{{query.id}}">{{query.num_likes}}</div>
+                                </div>
+                                <div class="column">
+                                    likes
+                                </div>
+                            </div>
+                            
                     </form>
                 </div>
                 <i class="comment icon"></i>
@@ -108,6 +116,39 @@
                     display=false
                 }  
             });
+
+            $('.like-form').submit(function(e){
+                e.preventDefault()
+
+                const post_id = $(this).attr('id')
+                const url = $(this).attr('action')
+                const likeText = $.trim($(`.like-btn${post_id}`).text())
+                const likeCount = parseInt($(`.like-count${post_id}`).text())
+
+                $.ajax({
+                    type:'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                        'post_id':post_id
+                    },
+                    success: function(response){
+
+                        function updateLikes(num, text){
+                            $(`.like-btn${post_id}`).text(`${text}`)
+                            $(`.like-count${post_id}`).text(num)
+                        }
+                        
+                        likeText === 'Unlike' 
+                        ? updateLikes(likeCount - 1, 'Like') 
+                        : updateLikes(likeCount + 1, 'Unlike')
+
+                    },
+                    error: function(response){
+                        console.log('error', response)
+                    },
+                })
+            })
         });
     </script>
 {% endblock scripts %}
