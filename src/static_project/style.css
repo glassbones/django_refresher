@@ -49,6 +49,10 @@ body {
     font-size: 20px !important;
 }
 
+.w-big {
+    width: 200px !important;
+}
+
 .mbv-5 {
     margin-bottom: 5px !important;
 }

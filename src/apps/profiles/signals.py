@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver #decorator these are cool!
 from .models import Profile, Relationship
@@ -23,3 +23,12 @@ def post_save_add_to_friends(sender, instance, created, **kwargs):
         receiver_.friends.add(sender_.user) # adding sender to receivers 'Profile.friends' (manyToMany field)
         sender_.save()
         receiver_.save()
+
+@receiver(pre_delete, sender=Relationship)
+def pre_delete_remove_from_friends(sender, instance, **kwargs):
+    sender = instance.sender
+    receiver = instance.receiver
+    sender.friends.remove(receiver.user)
+    receiver.friends.remove(sender.user)
+    sender.save()
+    receiver.save()

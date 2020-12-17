@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from apps.profiles.models import Profile, Relationship
 from .forms import ProfileModelForm
 from django.views.generic import ListView
 from django.contrib.auth.models import User
+from django.db.models import Q
 # Create your views here.
 def my_profile_view(request):
     profile = Profile.objects.get(user=request.user)
@@ -86,4 +87,35 @@ class ProfileListView(ListView):
 
         return context
     
+def send_invitation(request):
+    if request.method =='POST':
+        pk = request.POST.get('profile_pk') # target
+        user = request.user # origin
+        sender = Profile.objects.get(user=user)
+        receiver = Profile.objects.get(pk=pk)
+
+        rel = Relationship.objects.create(sender=sender, receiver=receiver, status='send')
+
+        return redirect(request.META.get('HTTP_REFERER'))
+    return redirect('profiles:my-profile-view')
     
+def remove_friend(request):
+    if request.method =='POST':
+        pk = request.POST.get('profile_pk') # target
+        user = request.user # origin
+        sender = Profile.objects.get(user=user)
+        receiver = Profile.objects.get(pk=pk)
+        
+        # Unfortunately we dont know which user originally created the relationship (sent the friend request)
+        # we have to query the sent relationships of the user and the pk here
+
+        rel = Relationship.objects.get(
+            # user sent the relationship invite
+            (Q(sender=sender) & Q(receiver=receiver)) | 
+            # user received the relationship invite
+            (Q(sender=receiver) & Q(receiver=sender)) 
+        )
+
+        rel.delete()
+        return redirect(request.META.get('HTTP_REFERER'))
+    return redirect('profiles:my-profile-view')
