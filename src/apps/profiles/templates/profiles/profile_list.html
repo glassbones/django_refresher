@@ -5,11 +5,59 @@ all profiles
 {% endblock title %}
 
 {% block content %}
+    {% if is_empty %}
+        <h1>You are friends with everyone on the platform.. You are quite popular.</h1>
+    {% endif %}
 
-    {% for query in query_set %}
-        <ul>
-            <li>{{query}}</li>
-        </ul>
+    {% for obj in object_list %}
+        <div class="ui segment">
+            <div class="ui grid">
+                <div class="row">
+                    <div class="three wide column">
+                        <img class="ui small circular image" src={{obj.avatar.url}}>
+
+                    </div>
+                    <div class="thirteen wide column">
+
+                        <h3>{{obj.user}}</h3>
+                        <p>{{obj.bio}}</p>
+                        <button class="ui primary button">Profile</button>
+
+
+                        <!-- unbelievably scuffed way of checking if other users share relationships with the user -->
+                        <!-- This log really shouldnt be inside of the HTML lol -->
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="profile_pk" value={{obj.pk}}>
+                            {% if obj.user not in received_rel_users and obj.user not in sent_rel_users %}
+                                <button type="submit" class="ui positive basic button">
+                                    <i class="plus square icon"></i>
+                                    Add to friends
+                                </button>
+                            {% endif %}
+                            {% if obj.user in received_rel_users and request.user not in obj.friends.all %}
+                                <button type="submit" class="ui disabled button">
+                                    <i class="user icon"></i>
+                                    Request Sent!
+                                </button>
+                            {% endif %}
+                            {% if request.user in obj.friends.all %}
+                                <button type="submit" class="ui negative basic button">
+                                    <i class="minus square icon"></i>
+                                    Remove from friends
+                                </button>
+                            {% endif %}
+                        </form>
+
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="profile_pk" value={{obj.pk}}>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endfor %}
 
 {% endblock content %}
