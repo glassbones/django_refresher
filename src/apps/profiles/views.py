@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from apps.profiles.models import Profile, Relationship
+from django_refresher.src.apps.profiles.models import Profile, Relationship
 from .forms import ProfileModelForm
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
+@login_required
 def my_profile_view(request):
     profile = Profile.objects.get(user=request.user)
     form = ProfileModelForm(request.POST or None, request.FILES or None, instance=profile) # <-- args here fill the form
@@ -23,6 +26,7 @@ def my_profile_view(request):
 
     return render(request, 'profiles/myprofile.html', context)
 
+@login_required
 def invites_received_view(request):
     profile = Profile.objects.get(user=request.user)
     query_set = Relationship.objects.invitations_received(profile)
@@ -32,6 +36,7 @@ def invites_received_view(request):
     context = {'query_set': results}
     return render(request,'profiles/my_invites.html', context)
 
+@login_required
 def invite_profiles_list_view(request):
     user = request.user
     query_set = Profile.objects.get_available_relationships(user)
@@ -41,6 +46,7 @@ def invite_profiles_list_view(request):
 
 # same as ProfileListView just a function instead of a class
 # (start) this code is not being used
+@login_required
 def profiles_list_view(request):
     user = request.user
     query_set = Profile.objects.get_all_profiles(user)
@@ -48,7 +54,7 @@ def profiles_list_view(request):
     return render(request,'profiles/profile_list.html', context)
 # (end) this code is not being used
 
-class ProfileDetailView(DetailView):
+class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = Profile
     template_name = 'profiles/detail.html'
     #overide default method
@@ -85,7 +91,7 @@ class ProfileDetailView(DetailView):
         return context
 
 
-class ProfileListView(ListView):
+class ProfileListView(LoginRequiredMixin, ListView):
     model = Profile
     template_name = 'profiles/profile_list.html'
     #overiding attr name
@@ -122,7 +128,8 @@ class ProfileListView(ListView):
         context['is_empty'] = not len(self.get_queryset())
 
         return context
-    
+
+@login_required   
 def send_invitation(request):
     if request.method =='POST':
         pk = request.POST.get('profile_pk') # target
@@ -135,6 +142,7 @@ def send_invitation(request):
         return redirect(request.META.get('HTTP_REFERER'))
     return redirect('profiles:my-profile-view')
 
+@login_required
 def accept_invitation(request):
     if request.method=="POST":
         pk = request.POST.get('profile_pk')
@@ -142,11 +150,11 @@ def accept_invitation(request):
         receiver = Profile.objects.get(user=request.user)
         relation = get_object_or_404(Relationship, sender=sender, receiver=receiver)
         if relation.status == 'send':
-            relation.status == 'accepted'
+            relation.status = 'accepted'
             relation.save()
-        return redirect('profiles:my-invites-view')
+    return redirect('profiles:my-invites-view')
         
-
+@login_required
 def reject_invitation(request):
     if request.method=="POST":
         pk = request.POST.get('profile_pk')
@@ -155,7 +163,8 @@ def reject_invitation(request):
         relation = get_object_or_404(Relationship, sender=sender, receiver=receiver)
         relation.delete()
         return redirect('profiles:my-invites-view')
-    
+        
+@login_required    
 def remove_friend(request):
     if request.method =='POST':
         pk = request.POST.get('profile_pk') # target

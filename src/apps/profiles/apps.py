@@ -4,4 +4,5 @@ class ProfilesConfig(AppConfig):
     name = 'apps.profiles'
 
     def ready(self):
-        import apps.profiles.signals
+        import django_refresher.src.apps.profiles.signals
+

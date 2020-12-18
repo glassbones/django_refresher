@@ -26,9 +26,8 @@ my invites
                         <form action="{% url 'profiles:accept-invitation' %}" method='POST'>
                             {% csrf_token %}
                             <input type='hidden' name='profile_pk' value={{query.pk}}>
-                            <input type='hidden' name='profile_pk' value={{query.pk}}>
                             <button type='submit' class='ui positive basic button w-big mb-5'>
-                                <i class='close icon'></i>
+                                <i class='check icon'></i>
                                 Accept Request
                             </button>    
                         </form>
