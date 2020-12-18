@@ -5,7 +5,7 @@ A social webapp rendered server side and built exclusively with django.
 
 ![djb_demo_demo](gitGifs/1.gif)
 
-![djb_demo_demo](gitGifs/1.gif)
+![djb_demo_demo](gitGifs/2.gif)
 
 
 **Features:**  
