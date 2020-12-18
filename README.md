@@ -3,7 +3,9 @@
 **Description:**  
 A social webapp rendered server side and built exclusively with django.
 
-<!-- ![pyGame_demo](demo/bpy_anim.gif) -->
+![djb_demo_demo](gitGifs/1.gif)
+
+![djb_demo_demo](gitGifs/1.gif)
 
 
 **Features:**  
