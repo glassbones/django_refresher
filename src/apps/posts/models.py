@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
-from apps.profiles.models import Profile
+from django_refresher.src.apps.profiles.models import Profile
 
 # Create your models here.
 

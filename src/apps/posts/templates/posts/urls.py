@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.posts.views import post_comment_create_and_list_view, like_toggle_post, PostDeleteView, PostUpdateView
+from django_refresher.src.apps.posts.views import post_comment_create_and_list_view, like_toggle_post, PostDeleteView, PostUpdateView
 
 app_name = 'posts'
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.profiles.views import (
+from django_refresher.src.apps.profiles.views import (
     my_profile_view,
     invites_received_view,
     ProfileDetailView,
