@@ -8,6 +8,7 @@ django = "*"
 pillow = "*"
 django-allauth = "*"
 django-rest-auth = {extras = ["with_social"], version = "*"}
+gunicorn = "*"
 
 [dev-packages]
 
