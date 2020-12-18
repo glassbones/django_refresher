@@ -1,11 +1,12 @@
 # djangoBook
 
-**Description:** A social webapp rendered server side and built exclusively with django.
+**Description:**  
+A social webapp rendered server side and built exclusively with django.
 
 <!-- ![pyGame_demo](demo/bpy_anim.gif) -->
 
 
-**Features:** 
+**Features:**  
 Static HTML and CSS  
 Secure email authorization via AllAuth  
 Validated forms  
